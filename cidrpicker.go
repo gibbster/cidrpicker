@@ -147,7 +147,7 @@ func FindBlock(vpc net.IPNet, occupied *[]net.IPNet, size int) (result net.IPNet
 				result = block
 				break
 			}
-		} else { // cidr size of block > size
+		} else if cidrSize(block) < size { 
 			left, right := bisectSubnet(block)
 			blocks = append(blocks, left)
 			blocks = append(blocks, right)

@@ -20,11 +20,17 @@ func TestFindBlock(t *testing.T) {
   _, net, _ := net.ParseCIDR("10.0.0.0/10")
 
   block24 := FindBlock(*net, &subnets, 24)
-  if  block24.String() != "10.0.0.0/24" {
+  if block24.String() != "10.0.0.0/24" {
     t.Errorf("Found block %v, expected %v", block24.String(), "10.0.0.0/24") 
   }
+
   block23 := FindBlock(*net, &subnets, 23)
-  if  block23.String() != "10.0.4.0/23" {
+  if block23.String() != "10.0.4.0/23" {
     t.Errorf("Found block %v, expected %v", block23.String(), "10.0.4.0/23") 
+  }
+
+  block10 := FindBlock(*net, &subnets, 10)
+  if block10.String() != "<nil>" {
+    t.Errorf("Found block %v, expected %v", block10.String(), "<nil>") 
   }
 }
