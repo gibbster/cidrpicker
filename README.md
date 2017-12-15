@@ -25,7 +25,7 @@ Usage of ./cidrpicker:
 
 Run the program
 ```
-./cidrpicker -vpicid vpc-XXXXXXX -size 24
+./cidrpicker -vpicid vpc-XXXXXXX -size 23
 10.0.4.0/23
 ```
 
@@ -34,6 +34,7 @@ Run the program
  * Add more unit tests
  * Optimize for efficiency
  * Add cloudformation custom resource script (will do this as soon as AWS golang support rolls out)
+ * Once I learn more about golang standards - do that. This is my first attempt at Go, so I'm sure there's ugly warts to remove
 
 ## Authors
 
@@ -41,5 +42,5 @@ Run the program
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
