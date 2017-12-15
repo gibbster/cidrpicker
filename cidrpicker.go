@@ -101,9 +101,9 @@ func cidrSize(net net.IPNet) int {
 
 func netInList(net *net.IPNet, list *[]net.IPNet) bool {
 	found := false
-	log.Printf("Checking against %v\n", net.String())
+	//log.Printf("Checking against %v\n", net.String())
 	for _, test := range *list {
-		log.Printf("Testing %v\n", test.String())
+		//log.Printf("Testing %v\n", test.String())
 		if net.String() == test.String() {
 			found = true
 		}
@@ -122,26 +122,26 @@ func netContainsNets(net *net.IPNet, list *[]net.IPNet) bool {
 	return contains
 }
 
-func findBlock(vpc net.IPNet, occupied *[]net.IPNet, size int) (result net.IPNet) {
+func FindBlock(vpc net.IPNet, occupied *[]net.IPNet, size int) (result net.IPNet) {
 	blocks := []net.IPNet{vpc}
-	log.Printf("Looking for a block of size %v\n", size)
+	//log.Printf("Looking for a block of size %v\n", size)
 	for len(blocks) > 0 {
 		//pop the first element off the queue
-		log.Printf("blocks are set to %v\n", blocks)
+		//log.Printf("blocks are set to %v\n", blocks)
 		block := blocks[0]
 		blocks = blocks[1:]
 		//block := blocks[len(blocks)-1]
 		//blocks = blocks[:len(blocks)-1]
 		if netInList(&block, occupied) {
-			log.Printf("Found block %v in occupied list :-(", block.String())
+			//log.Printf("Found block %v in occupied list :-(", block.String())
 			continue
 		}
 
-		log.Printf("block is size %v\n", cidrSize(block))
+		//log.Printf("block is size %v\n", cidrSize(block))
 		if cidrSize(block) == size {
-			log.Println("Block is the right size")
+			//log.Println("Block is the right size")
 			if netContainsNets(&block, occupied) {
-				log.Printf("Found one of the occupied nets within %v :-(", block.String())
+				//log.Printf("Found one of the occupied nets within %v :-(", block.String())
 				continue
 			} else {
 				result = block
@@ -193,7 +193,7 @@ func main() {
 			}
 			subnets[i] = *sn
 		}
-		block := findBlock(*vpc, &subnets, *size)
+		block := FindBlock(*vpc, &subnets, *size)
 		//fmt.Printf("VPC: %v\n", vpc)
 		//fmt.Printf("subnets: %v\n", subnetCidrs)
 		//fmt.Printf("found this block: %v\n", block.String())
