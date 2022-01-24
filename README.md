@@ -49,22 +49,22 @@ NAME:
     cidrpicker free - Find the next free CIDR block for the given size.
 
 SYNOPSIS:
-    cidrpicker free --vpc-id <string> [--help|-?] [--profile <string>] [--quiet]
-                    [--region <string>] [--size <int>] [<args>]
+    cidrpicker free --vpc-id <string> [--help|-?] [--profile <aws_profile>]
+                    [--quiet] [--region <aws_region>] [--size <int>] [<args>]
 
 REQUIRED PARAMETERS:
     --vpc-id <string>
 
 OPTIONS:
-    --help|-?             (default: false)
+    --help|-?                  (default: false)
 
-    --profile <string>    (default: "")
+    --profile <aws_profile>    (default: "")
 
-    --quiet               (default: false)
+    --quiet                    (default: false)
 
-    --region <string>     (default: "")
+    --region <aws_region>      (default: "")
 
-    --size <int>          (default: 24)
+    --size <int>               (default: 24)
 ```
 
 Run the program:
