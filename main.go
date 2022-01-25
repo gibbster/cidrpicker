@@ -112,31 +112,34 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 	if err != nil {
 		return err
 	}
-	Logger.Printf("VPC: %s\n", *vpc.CidrBlock)
+	Logger.Printf("VPC %s %s\n", *vpc.VpcId, *vpc.CidrBlock)
+
+	type netSubnet struct {
+		Subnet types.Subnet
+		Net    net.IPNet
+	}
 
 	subnets, err := getVPCSubnets(ctx, client, vpcID)
 	if err != nil {
 		return err
 	}
 
-	cidrs := []string{}
-	for _, subnet := range subnets {
-		cidrs = append(cidrs, *subnet.CidrBlock)
-	}
-
+	netSubnets := []netSubnet{}
 	netCIDRs := []net.IPNet{}
-	for _, cidr := range cidrs {
-		_, c, err := net.ParseCIDR(cidr)
+	for _, subnet := range subnets {
+		_, c, err := net.ParseCIDR(*subnet.CidrBlock)
 		if err != nil {
 			return err
 		}
+		netSubnets = append(netSubnets, netSubnet{subnet, *c})
 		netCIDRs = append(netCIDRs, *c)
 	}
-	sort.Slice(netCIDRs, func(i, j int) bool {
-		return bytes.Compare(netCIDRs[i].IP, netCIDRs[j].IP) < 0
+
+	sort.Slice(netSubnets, func(i, j int) bool {
+		return bytes.Compare(netSubnets[i].Net.IP, netSubnets[j].Net.IP) < 0
 	})
-	for _, cidr := range netCIDRs {
-		Logger.Printf("Subnet: %s\n", cidr.String())
+	for _, subnet := range netSubnets {
+		Logger.Printf("Subnet %s %s\n", *subnet.Subnet.SubnetId, subnet.Net.String())
 	}
 
 	_, vpcNetCIDR, err := net.ParseCIDR(*vpc.CidrBlock)
