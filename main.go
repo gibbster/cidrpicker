@@ -64,6 +64,11 @@ func program(args []string) int {
 	return 0
 }
 
+type netSubnet struct {
+	Subnet types.Subnet
+	Net    net.IPNet
+}
+
 func ListRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 	profile := opt.Value("profile").(string)
 	region := opt.Value("region").(string)
@@ -88,6 +93,27 @@ func ListRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 	}
 	for _, vpc := range output.Vpcs {
 		fmt.Printf("VPC: %-21s, CIDR: %s\n", *vpc.VpcId, *vpc.CidrBlock)
+
+		subnets, err := getVPCSubnets(ctx, client, *vpc.VpcId)
+		if err != nil {
+			return err
+		}
+
+		netSubnets := []netSubnet{}
+		for _, subnet := range subnets {
+			_, c, err := net.ParseCIDR(*subnet.CidrBlock)
+			if err != nil {
+				return err
+			}
+			netSubnets = append(netSubnets, netSubnet{subnet, *c})
+		}
+
+		sort.Slice(netSubnets, func(i, j int) bool {
+			return bytes.Compare(netSubnets[i].Net.IP, netSubnets[j].Net.IP) < 0
+		})
+		for _, subnet := range netSubnets {
+			Logger.Printf("Subnet %s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
+		}
 	}
 
 	return nil
@@ -114,11 +140,6 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 	}
 	Logger.Printf("VPC %s %s\n", *vpc.VpcId, *vpc.CidrBlock)
 
-	type netSubnet struct {
-		Subnet types.Subnet
-		Net    net.IPNet
-	}
-
 	subnets, err := getVPCSubnets(ctx, client, vpcID)
 	if err != nil {
 		return err
@@ -139,7 +160,7 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 		return bytes.Compare(netSubnets[i].Net.IP, netSubnets[j].Net.IP) < 0
 	})
 	for _, subnet := range netSubnets {
-		Logger.Printf("Subnet %s %s\n", *subnet.Subnet.SubnetId, subnet.Net.String())
+		Logger.Printf("Subnet %s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
 	}
 
 	_, vpcNetCIDR, err := net.ParseCIDR(*vpc.CidrBlock)
