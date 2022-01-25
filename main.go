@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/DavidGamba/go-getoptions"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -37,6 +39,7 @@ func program(args []string) int {
 	free.String("region", "", opt.ArgName("aws_region"))
 	free.String("vpc-id", "", opt.Required())
 	free.Int("size", 24)
+	free.Int("number", 1, opt.Description("number of CIDR blocks to generate."))
 	opt.HelpCommand("help", opt.Alias("?"))
 	remaining, err := opt.Parse(args[1:])
 	if err != nil {
@@ -95,6 +98,7 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 	region := opt.Value("region").(string)
 	vpcID := opt.Value("vpc-id").(string)
 	size := opt.Value("size").(int)
+	number := opt.Value("number").(int)
 	Logger.Printf("profile: %s, region: %s, vpcID: %s, size: %d", profile, region, vpcID, size)
 
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithSharedConfigProfile(profile), config.WithRegion(region))
@@ -117,7 +121,6 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 
 	cidrs := []string{}
 	for _, subnet := range subnets {
-		Logger.Printf("Subnet: %s\n", *subnet.CidrBlock)
 		cidrs = append(cidrs, *subnet.CidrBlock)
 	}
 
@@ -129,13 +132,23 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 		}
 		netCIDRs = append(netCIDRs, *c)
 	}
+	sort.Slice(netCIDRs, func(i, j int) bool {
+		return bytes.Compare(netCIDRs[i].IP, netCIDRs[j].IP) < 0
+	})
+	for _, cidr := range netCIDRs {
+		Logger.Printf("Subnet: %s\n", cidr.String())
+	}
+
 	_, vpcNetCIDR, err := net.ParseCIDR(*vpc.CidrBlock)
 	if err != nil {
 		return err
 	}
 
-	result := FindBlock(*vpcNetCIDR, &netCIDRs, size)
-	fmt.Printf("%s\n", result.String())
+	for i := 0; i < number; i++ {
+		result := FindBlock(*vpcNetCIDR, &netCIDRs, size)
+		fmt.Printf("%s\n", result.String())
+		netCIDRs = append(netCIDRs, result)
+	}
 
 	return nil
 }

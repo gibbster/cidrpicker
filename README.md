@@ -44,19 +44,22 @@ Use 'cidrpicker help <command>' for extra details.
 ```
 
 ```
-$ ./cidrpicker free help
+$ ./cidrpicker free help  
 NAME:
     cidrpicker free - Find the next free CIDR block for the given size.
 
 SYNOPSIS:
-    cidrpicker free --vpc-id <string> [--help|-?] [--profile <aws_profile>]
-                    [--quiet] [--region <aws_region>] [--size <int>] [<args>]
+    cidrpicker free --vpc-id <string> [--help|-?] [--number <int>]
+                    [--profile <aws_profile>] [--quiet] [--region <aws_region>]
+                    [--size <int>] [<args>]
 
 REQUIRED PARAMETERS:
     --vpc-id <string>
 
 OPTIONS:
     --help|-?                  (default: false)
+
+    --number <int>             number of CIDR blocks to generate. (default: 1)
 
     --profile <aws_profile>    (default: "")
 
@@ -75,8 +78,9 @@ VPC: vpc-XXX, CIDR: 10.0.0.0/16
 ```
 
 ```
-$./cidrpicker free --profile <profile> --region <region> --vpc-id vpc-XXX -size 23
-10.0.4.0/23
+$./cidrpicker free --profile <profile> --region <region> --vpc-id vpc-XXX -size 24 -n 2
+10.0.2.0/24
+10.0.3.0/24
 ```
 
 ## TODO
