@@ -31,6 +31,7 @@ func program(args []string) int {
 	opt.Bool("quiet", false)
 
 	list := opt.NewCommand("list", "List VPCs").SetCommandFn(ListRun)
+	list.SetUnknownMode(getoptions.Pass)
 	list.String("profile", "", opt.ArgName("aws_profile"))
 	list.String("region", "", opt.ArgName("aws_region"))
 	list.String("vpc-id", "")
@@ -112,7 +113,7 @@ func ListRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 			return bytes.Compare(netSubnets[i].Net.IP, netSubnets[j].Net.IP) < 0
 		})
 		for _, subnet := range netSubnets {
-			Logger.Printf("Subnet %s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
+			Logger.Printf("Subnet %-24s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
 		}
 	}
 
@@ -160,7 +161,7 @@ func FreeRun(ctx context.Context, opt *getoptions.GetOpt, args []string) error {
 		return bytes.Compare(netSubnets[i].Net.IP, netSubnets[j].Net.IP) < 0
 	})
 	for _, subnet := range netSubnets {
-		Logger.Printf("Subnet %s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
+		Logger.Printf("Subnet %-24s %s %s\n", *subnet.Subnet.SubnetId, *subnet.Subnet.AvailabilityZone, subnet.Net.String())
 	}
 
 	_, vpcNetCIDR, err := net.ParseCIDR(*vpc.CidrBlock)
